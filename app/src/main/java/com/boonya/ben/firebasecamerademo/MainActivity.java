@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,9 @@ import com.boonya.ben.firebasecamerademo.helper.PhotoSelectionHelper;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -30,12 +34,15 @@ import java.io.ByteArrayOutputStream;
 
 public class MainActivity extends AppCompatActivity {
     private PhotoSelectionHelper mPhotoSelectionHelper;
+    private StorageReference mStorageRef;
+    private FirebaseAuth mAuth;
+
     private ImageView mImageView;
     private Button mUploadBtn;
     private FloatingActionButton mFab;
-    private StorageReference mStorageRef;
 
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+    private static final String TAG = "FirebaseAuth";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         mFab = (FloatingActionButton) findViewById(R.id.fab);
 
         mStorageRef = FirebaseStorage.getInstance().getReference().child(Const.Firebase.FIREBASE_FOOD_DIRECTORY);
+        mAuth = FirebaseAuth.getInstance();
         mPhotoSelectionHelper = new PhotoSelectionHelper(this, new PhotoSelectionHelper.CallBack() {
             @Override
             public void onCroppedSuccess(final Uri croppedUri) {
@@ -65,6 +73,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            signInAnonymously();
+        }
 
         mFab.setOnClickListener(new View.OnClickListener()
 
@@ -115,6 +128,20 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
                 Toast.makeText(MainActivity.this, "Upload success!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void signInAnonymously() {
+        mAuth.signInAnonymously().addOnSuccessListener(this, new OnSuccessListener<AuthResult>() {
+            @Override
+            public void onSuccess(AuthResult authResult) {
+
+            }
+        }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e(TAG, "signInAnonymously:FAILURE", exception);
             }
         });
     }
