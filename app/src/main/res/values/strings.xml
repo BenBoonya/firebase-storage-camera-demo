@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">FirebaseCameraDemo</string>
+    <string name="action_settings">Settings</string>
+    <string-array name="action_select_image_action">
+        <item>Camera</item>
+        <item>Gallery</item>
+    </string-array>
+    <string name="label_ok">ok</string>
+    <string name="label_error">Error</string>
+    <string name="label_error_no_supported_action">Not support action</string>
+</resources>
