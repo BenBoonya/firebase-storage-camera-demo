@@ -1,9 +1,9 @@
 package com.boonya.ben.firebasecamerademo;
 
 import android.Manifest;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,33 +15,23 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.boonya.ben.firebasecamerademo.helper.PhotoSelectionHelper;
-import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-import java.io.ByteArrayOutputStream;
 
 public class MainActivity extends AppCompatActivity {
     private PhotoSelectionHelper mPhotoSelectionHelper;
-    private StorageReference mStorageRef;
     private FirebaseAuth mAuth;
 
-    private ImageView mImageView;
-    private Button mUploadBtn;
     private FloatingActionButton mFab;
+    private FragmentManager mFragmentManager;
 
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+    private static final String FRAGMENT_NAME = "Upload Dialog";
     private static final String TAG = "FirebaseAuth";
 
     @Override
@@ -51,20 +41,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mImageView = (ImageView) findViewById(R.id.image_view);
-        mUploadBtn = (Button) findViewById(R.id.upload_button);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
-
-        mStorageRef = FirebaseStorage.getInstance().getReference().child(Const.Firebase.FIREBASE_FOOD_DIRECTORY);
         mAuth = FirebaseAuth.getInstance();
+        mFragmentManager = getFragmentManager();
         mPhotoSelectionHelper = new PhotoSelectionHelper(this, new PhotoSelectionHelper.CallBack() {
             @Override
             public void onCroppedSuccess(final Uri croppedUri) {
                 if (croppedUri != null) {
-                    Glide.with(mImageView.getContext())
-                            .load(croppedUri.toString())
-                            .override((int) getResources().getDimension(R.dimen.image_size_big), (int) getResources().getDimension(R.dimen.image_size_big))
-                            .into(mImageView);
+                    UploadImageDialogFragment uploadImageDialogFragment = UploadImageDialogFragment.newInstance(croppedUri.toString());
+                    uploadImageDialogFragment.show(mFragmentManager, FRAGMENT_NAME);
                 }
             }
         });
@@ -93,41 +78,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mPhotoSelectionHelper.selectPhoto();
                 }
-            }
-        });
-
-        mUploadBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mImageView.getDrawable() != null) {
-                    uploadImage();
-                } else {
-                    Toast.makeText(MainActivity.this, "Please select the image", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    @SuppressWarnings("VisibleForTests")
-    private void uploadImage() {
-        mImageView.setDrawingCacheEnabled(true);
-        mImageView.buildDrawingCache();
-        Bitmap bitmap = mImageView.getDrawingCache();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
-
-        UploadTask uploadTask = mStorageRef.child(String.valueOf(System.currentTimeMillis()) + ".jpg").putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                Toast.makeText(MainActivity.this, "Upload success!", Toast.LENGTH_SHORT).show();
             }
         });
     }
