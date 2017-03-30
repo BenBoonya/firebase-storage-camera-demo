@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class FileHelper {
 
-    private FileHelper(){
+    private FileHelper() {
         throw new IllegalAccessError("Utility class");
     }
 
@@ -35,8 +35,8 @@ public class FileHelper {
         String absolutePathOfImage;
         uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = { MediaStore.MediaColumns.DATA,
-                MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+        String[] projection = {MediaStore.MediaColumns.DATA,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
 
         cursor = context.getContentResolver().query(uri, projection, null,
                 null, null);
@@ -56,7 +56,7 @@ public class FileHelper {
      * other file-based ContentProviders.
      *
      * @param context The context.
-     * @param uri The Uri to query.
+     * @param uri     The Uri to query.
      * @author paulburke
      */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -102,7 +102,7 @@ public class FileHelper {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[] {
+                final String[] selectionArgs = new String[]{
                         split[1]
                 };
 
@@ -130,9 +130,9 @@ public class FileHelper {
      * Get the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
      *
-     * @param context The context.
-     * @param uri The Uri to query.
-     * @param selection (Optional) Filter used in the query.
+     * @param context       The context.
+     * @param uri           The Uri to query.
+     * @param selection     (Optional) Filter used in the query.
      * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
@@ -192,16 +192,16 @@ public class FileHelper {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
-    public static Uri getImageFileUri(Context context, Intent intent){
-        if(context != null && intent != null){
+    public static Uri getImageFileUri(Context context, Intent intent) throws NullPointerException {
+        if (context != null && intent != null) {
             return getImageFileUri(context, intent, intent.getData());
         }
         return null;
     }
 
-    public static Uri getImageFileUri(Context context, Intent intent, Uri uri){
-        if(context != null && uri != null){
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+    public static Uri getImageFileUri(Context context, Intent intent, Uri uri) throws NullPointerException {
+        if (context != null && uri != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 final int takeFlags = intent.getFlags()
                         & (Intent.FLAG_GRANT_READ_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
