@@ -10,25 +10,38 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
+import com.boonya.ben.firebasecamerademo.adapter.recycler.ImagePreviewAdapter;
+import com.boonya.ben.firebasecamerademo.adapter.recycler.ViewHolder.ImagePreviewViewHolder;
 import com.boonya.ben.firebasecamerademo.helper.PhotoSelectionHelper;
+import com.boonya.ben.firebasecamerademo.model.ImageInfo;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
     private PhotoSelectionHelper mPhotoSelectionHelper;
     private FirebaseAuth mAuth;
+    private DatabaseReference mImageInfoRef;
+    private FirebaseRecyclerAdapter mAdapter;
 
+    private ProgressBar mProgressBar;
     private FloatingActionButton mFab;
     private FragmentManager mFragmentManager;
+    private RecyclerView mRecyclerView;
 
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     private static final String FRAGMENT_NAME = "Upload Dialog";
@@ -40,10 +53,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
         mAuth = FirebaseAuth.getInstance();
         mFragmentManager = getFragmentManager();
+        mImageInfoRef = FirebaseDatabase.getInstance().getReference().child(Const.Firebase.FIREBASE_IMAGE_INFO_REF);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
         mPhotoSelectionHelper = new PhotoSelectionHelper(this, new PhotoSelectionHelper.CallBack() {
             @Override
             public void onCroppedSuccess(final Uri croppedUri) {
@@ -80,6 +96,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        setUpRecyclerView();
+    }
+
+    private void setUpRecyclerView() {
+        mRecyclerView.setHasFixedSize(false);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter = new ImagePreviewAdapter(ImageInfo.class, R.layout.photo_preview_viewholder
+                , ImagePreviewViewHolder.class, mImageInfoRef) {
+            @Override
+            protected void onDataChanged() {
+                super.onDataChanged();
+                if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE) {
+                    mProgressBar.setVisibility(View.GONE);
+                }
+            }
+        };
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void signInAnonymously() {
