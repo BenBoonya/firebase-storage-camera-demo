@@ -1,6 +1,7 @@
 package com.boonya.ben.firebasecamerademo;
 
 import android.app.DialogFragment;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,6 +41,7 @@ public class UploadImageDialogFragment extends DialogFragment {
     private String mImageDescription;
     private StorageReference mStorageRef;
     private DatabaseReference mImageInfoReference;
+    private Context mContext;
 
     public static UploadImageDialogFragment newInstance(String imageUri) {
         UploadImageDialogFragment fragment = new UploadImageDialogFragment();
@@ -58,6 +60,7 @@ public class UploadImageDialogFragment extends DialogFragment {
 
         Bundle bundle = getArguments();
         mImageUri = bundle.getString(Const.Extra.IMAGE_URI_EXTRA);
+        mContext = getActivity();
 
         return inflater.inflate(R.layout.upload_image_dialog_fragment, container, false);
 
@@ -115,7 +118,9 @@ public class UploadImageDialogFragment extends DialogFragment {
             @Override
             public void onFailure(@NonNull Exception e) {
                 mProgressBar.setVisibility(View.GONE);
-                Toast.makeText(getActivity(), "Upload fail", Toast.LENGTH_SHORT).show();
+                if (getActivity() != null) {
+                    Toast.makeText(getActivity(), "Upload fail", Toast.LENGTH_SHORT).show();
+                }
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -129,8 +134,12 @@ public class UploadImageDialogFragment extends DialogFragment {
                     mImageInfoReference.push().setValue(imageInfo);
                 }
                 mProgressBar.setVisibility(View.GONE);
-                Toast.makeText(getActivity(), "Upload success", Toast.LENGTH_SHORT).show();
-                getDialog().dismiss();
+                if (getActivity() != null) {
+                    Toast.makeText(getActivity(), "Upload success", Toast.LENGTH_SHORT).show();
+                }
+                if (getDialog() != null) {
+                    getDialog().dismiss();
+                }
             }
         });
     }
