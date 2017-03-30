@@ -8,20 +8,17 @@
     tools:context="com.boonya.ben.firebasecamerademo.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/image_view"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <Button
-        android:id="@+id/upload_button"
+    <ProgressBar
+        android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/image_view"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
-        android:text="Upload" />
+        android:layout_centerVertical="true"
+        android:visibility="visible" />
 
 </RelativeLayout>

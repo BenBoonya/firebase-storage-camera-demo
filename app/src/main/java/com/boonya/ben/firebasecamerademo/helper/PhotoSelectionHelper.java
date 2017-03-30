@@ -99,7 +99,6 @@ public class PhotoSelectionHelper {
         }
     }
 
-
     private void crop() {
         File file = new File(getSelectedPhotoPathUri().getPath());
         if (file.exists()) {
@@ -185,5 +184,4 @@ public class PhotoSelectionHelper {
     public interface CallBack {
         void onCroppedSuccess(Uri croppedUri);
     }
-
 }
